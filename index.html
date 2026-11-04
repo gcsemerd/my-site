@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Field Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=DM+Mono:wght@400&display=swap">
+<style>
+/* Layout: a single wall of photos, each with a short caption underneath. */
+:root{
+  --bg:#ECEFEA; --surface:#F7F9F6; --fg:#14191B; --muted:#5B6568; --line:#CBD1CB; --accent:#2740E8;
+  --f-display:'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif;
+  --f-body:'Newsreader',Georgia,'Times New Roman',serif;
+  --f-mono:'DM Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1213; --surface:#161B1D; --fg:#E7ECE8; --muted:#8E9A9C; --line:#2A3235; --accent:#7E90FF; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1213; --surface:#161B1D; --fg:#E7ECE8; --muted:#8E9A9C; --line:#2A3235; --accent:#7E90FF; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--f-body); font-size:1.0625rem; line-height:1.5;
+  padding-block:0 4rem;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap{max-width:1100px; margin:0 auto}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+header{padding-block:3rem 2.5rem; display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:.5rem 2rem}
+h1{font-family:var(--f-display); font-weight:700; font-size:clamp(2rem,6vw,3.25rem); letter-spacing:-.03em; line-height:1; margin:0}
+.tag{margin:0; color:var(--muted); max-width:36ch}
+
+/* masonry wall */
+.wall{columns:3 260px; column-gap:1.5rem}
+.card{break-inside:avoid; margin:0 0 2rem; display:block}
+.card img{width:100%; display:block; object-fit:cover; background:var(--surface); cursor:zoom-in}
+.card img + img{margin-top:.5rem}
+.card p{margin:.6rem 0 .25rem}
+.card time{font-family:var(--f-mono); font-size:.75rem; color:var(--muted)}
+.card.note{border-top:2px solid var(--accent); padding-top:.75rem}
+.card.note p{font-family:var(--f-display); font-weight:500; font-size:1.3rem; line-height:1.2; letter-spacing:-.01em; margin-top:0}
+
+.links{display:flex; flex-wrap:wrap; gap:.25rem 1.5rem; font-family:var(--f-mono); font-size:.8125rem}
+.links a{color:var(--fg); text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:4px; text-decoration-thickness:1px}
+.links a:hover{text-decoration-color:var(--accent); color:var(--accent)}
+.about{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); max-width:62ch; scroll-margin-top:1rem}
+.about h2{font-family:var(--f-display); font-weight:700; font-size:1.5rem; letter-spacing:-.02em; margin:0 0 .75rem}
+.about p{margin:0; font-size:1.125rem; line-height:1.6}
+.sample-note{font-family:var(--f-mono); font-size:.75rem; color:var(--muted); margin:0 0 2rem}
+
+/* enlarge */
+.zoom{position:fixed; inset:0; z-index:20; background:color-mix(in srgb, var(--bg) 94%, transparent); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.75rem; padding:1rem; cursor:zoom-out}
+.zoom[hidden]{display:none}
+.zoom img{max-width:100%; max-height:80vh; object-fit:contain}
+.zoom span{max-width:60ch; text-align:center}
+footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(--muted)}
+</style>
+
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <h1 id="name"></h1>
+      <p class="tag" id="tag"></p>
+    </div>
+    <nav class="links" id="links" aria-label="About and links"></nav>
+  </header>
+  <p class="sample-note" id="sample" hidden>Sample posts. The pictures are drawn placeholders, ready to be swapped for yours.</p>
+  <main class="wall" id="wall"></main>
+  <section class="about" id="about" aria-labelledby="about-h">
+    <h2 id="about-h">About me</h2>
+    <p id="about-text"></p>
+  </section>
+  <footer id="foot"></footer>
+</div>
+<div class="zoom" id="zoom" hidden role="dialog" aria-label="Enlarged photo"><img id="zimg" alt=""><span id="zcap"></span></div>
+
+<script>
+/* ==========================================================
+   EDIT ME. Newest first.
+   Each post has: date, text (the snippet), and optional photos.
+   - photos: a file path (photos/beach.jpg), a full URL, or a data: URI.
+   - A post with text and no photos shows as a text-only note.
+   ========================================================== */
+const SITE = {
+  name: "Field Notes",
+  tagline: "Pictures and a few words about them.",
+  isSample: true,
+  about: "Hi, I'm [your name]. I live in [city] and work as a [what you do]. I take pictures of ordinary mornings and write down what I notice. This is where I keep them.",
+  /* LinkedIn: your profile URL. Resume: a link to a PDF (a file path once you self-host, or a shared link). */
+  linkedin: "https://www.linkedin.com/in/your-name",
+  resume: "resume.pdf"
+};
+
+const POSTS = [
+  { date:"2026-11-02", text:"Gap in the fog on the morning ferry.", photos:[scene(1,"4/5")] },
+  { date:"2026-10-30", text:"Note to self: bring a thermos next time.", photos:[] },
+  { date:"2026-10-28", text:"Ten minutes after the rain stopped.", photos:[scene(3,"1/1")] },
+  { date:"2026-10-24", text:"Bakery line, 8:05 a.m. The cardamom buns are worth it.", photos:[scene(4,"3/2")] },
+  { date:"2026-10-19", text:"Last light on the ridge, then gone.", photos:[scene(5,"4/5"), scene(6,"4/5")] },
+  { date:"2026-10-11", text:"Nobody warned us the lake was under a foot of snow.", photos:[scene(7,"1/1")] },
+  { date:"2026-10-05", text:"Saturday market. Bought too many peaches.", photos:[scene(2,"3/2")] }
+];
+
+/* ---------- sample picture generator (delete once you use real photos) ---------- */
+function scene(n, ratio){
+  const pal = [
+    ["#F6C28B","#E7835A","#6E4B7A","#2D2E5A"], ["#BFD3E6","#7FA1C4","#4A6A8F","#27384F"],
+    ["#CFE3D2","#8DB59A","#4F7B66","#25443A"], ["#F2D7A6","#D9A15F","#9A6B3E","#47301F"],
+    ["#E7C3D6","#C98AAE","#7D5280","#352446"], ["#FBE0A8","#F29E5C","#B2504A","#4A2133"],
+    ["#D4E4EF","#A9C6DC","#6F95B5","#33516E"]
+  ][(n-1)%7];
+  let s = n*9301+49297; const r = () => (s = (s*9301+49297)%233280)/233280;
+  let layers = "";
+  for(let i=0;i<4;i++){
+    const y = 190 + i*62 + r()*20, a = 28+r()*30, f = 0.006+r()*0.01, p = r()*6;
+    let d = `M0 500 L0 ${y}`;
+    for(let x=0;x<=400;x+=10) d += ` L${x} ${(y + Math.sin(x*f*6+p)*a).toFixed(1)}`;
+    d += " L400 500 Z";
+    layers += `<path d="${d}" fill="${pal[i]}" opacity="${0.5+i*0.17}"/>`;
+  }
+  const sx = 90 + r()*220, sy = 90 + r()*70;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal[3]}"/><stop offset="1" stop-color="${pal[0]}"/></linearGradient></defs><rect width="400" height="500" fill="url(#g)"/><circle cx="${sx}" cy="${sy}" r="${24+r()*18}" fill="${pal[0]}" opacity=".9"/>${layers}</svg>`;
+  return {src:"data:image/svg+xml;utf8," + encodeURIComponent(svg), ratio};
+}
+
+/* ---------- render ---------- */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = d => new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+document.getElementById("name").textContent = SITE.name;
+document.getElementById("tag").textContent = SITE.tagline;
+document.getElementById("sample").hidden = !SITE.isSample;
+document.getElementById("foot").textContent = POSTS.length + " posts";
+document.title = SITE.name;
+document.getElementById("about-text").textContent = SITE.about;
+document.getElementById("links").innerHTML =
+  `<a href="#about">About me</a>` +
+  (SITE.linkedin ? `<a href="${esc(SITE.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : "") +
+  (SITE.resume ? `<a href="${esc(SITE.resume)}" target="_blank" rel="noopener">Resume</a>` : "");
+
+document.getElementById("wall").innerHTML = POSTS.map(p => {
+  const imgs = (p.photos||[]).map(ph => {
+    const o = typeof ph === "string" ? {src:ph} : ph;
+    return `<img src="${o.src}" alt="${esc(p.text)}" loading="lazy" ${o.ratio ? `style="aspect-ratio:${o.ratio}"` : ""}>`;
+  }).join("");
+  return `<article class="card${imgs ? "" : " note"}">${imgs}<p>${esc(p.text)}</p><time datetime="${p.date}">${fmt(p.date)}</time></article>`;
+}).join("");
+
+/* enlarge on click */
+const zoom = document.getElementById("zoom"), zimg = document.getElementById("zimg"), zcap = document.getElementById("zcap");
+document.getElementById("wall").addEventListener("click", e => {
+  if(e.target.tagName !== "IMG") return;
+  zimg.src = e.target.src; zimg.alt = e.target.alt; zcap.textContent = e.target.alt; zoom.hidden = false;
+});
+zoom.addEventListener("click", () => { zoom.hidden = true; });
+document.addEventListener("keydown", e => { if(e.key === "Escape") zoom.hidden = true; });
+</script>
+</body>
+</html>
