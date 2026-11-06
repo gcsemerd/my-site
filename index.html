@@ -104,10 +104,56 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
   .resume.animate .resume-part{opacity:1!important;transform:none!important}
   body{background:#fff;color:#000}
 }
+/* Close and return-to-top navigation */
+
+.section-bottom-actions {
+  border-top: 1px solid var(--line);
+  margin-top: 2rem;
+  padding-top: 1.1rem;
+}
+
+.section-top-actions {
+  margin: -.7rem 0 1.5rem;
+}
+
+.section-bottom-actions a,
+.section-top-actions a {
+  font: .78rem var(--f-mono);
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.section-bottom-actions a:hover,
+.section-top-actions a:hover {
+  color: var(--fg);
+}
+/* --- Contact form: styled to match Field Notes --- */
+.contact-section{max-width:790px;margin-top:3.5rem;padding:2rem 0 1rem;border-top:2px solid var(--accent);scroll-margin-top:1.5rem}
+.contact-eyebrow{font:.75rem var(--f-mono);letter-spacing:.12em;color:var(--accent);margin:0 0 .65rem}
+.contact-section h2{font:700 clamp(2rem,5vw,3rem)/1.1 var(--f-display);letter-spacing:-.03em;margin:0 0 .65rem}
+.contact-intro{font-size:1.15rem;color:var(--muted);max-width:48ch;margin:0 0 1.75rem}
+.contact-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.contact-field{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.contact-field label{font:.78rem var(--f-mono);color:var(--fg)}
+.contact-field input,.contact-field textarea,.contact-field select{background:var(--surface);border:1px solid var(--line);border-radius:0;color:var(--fg);font:1rem/1.5 var(--f-body);padding:.75rem .8rem;width:100%;min-width:0}
+.contact-field textarea{resize:vertical}
+.contact-field :is(input,textarea,select):focus{outline:2px solid var(--accent);outline-offset:2px}
+.contact-send{display:flex;align-items:center;flex-wrap:wrap;gap:.8rem 1rem}
+.contact-send button{background:var(--fg);color:var(--bg);border:1px solid var(--fg);padding:.75rem 1.1rem;cursor:pointer;font:.8rem var(--f-mono)}
+.contact-send button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.contact-send button:disabled{opacity:.6;cursor:wait}
+.contact-note{font:.72rem var(--f-mono);color:var(--muted);margin:0;max-width:42ch}
+.contact-status{font:.84rem var(--f-mono);min-height:1.5rem;margin:.65rem 0}
+.contact-status[data-state="error"]{color:#bd3c3c}
+.contact-status[data-state="success"]{color:var(--fg)}
+.contact-honeypot{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media(max-width:560px){.contact-fields{grid-template-columns:1fr}}
+@media print{.contact-section{display:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="top">
   <header>
     <div class="title">
       <h1 id="name"></h1>
@@ -133,8 +179,43 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
       <a href="#top" id="resume-close">Close résumé ↑</a>
     </div>
     <div id="resume-content"></div>
+  <div class="section-bottom-actions">
+  <a href="#top" id="resume-close-bottom">
+    ↑ Close résumé &amp; return to top
+  </a>
+</div>
   </section>
 
+  <section class="contact-section" id="contact" aria-labelledby="contact-heading" hidden>
+    <p class="contact-eyebrow">A NOTE, DIRECTLY TO ME</p>
+    <h2 id="contact-heading">Get in touch.</h2>
+    <p class="contact-intro">Have a question, an opportunity, or just want to say hello? Leave a message here.</p>
+    <form id="contact-form" action="https://formspree.io/f/xaeezqbv" method="POST">
+      <div class="contact-fields">
+        <div class="contact-field"><label for="contact-name">Your name</label><input id="contact-name" name="name" type="text" autocomplete="name" maxlength="120" required></div>
+        <div class="contact-field"><label for="contact-email">Your email</label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+      </div>
+      <div class="contact-field"><label for="contact-subject">Subject</label>
+        <select id="contact-subject" name="subject" required>
+          <option value="General inquiry">General inquiry</option>
+          <option value="Professional opportunity">Professional opportunity</option>
+          <option value="Website feedback">Website feedback</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="contact-field"><label for="contact-message">Message</label><textarea id="contact-message" name="message" rows="6" maxlength="10000" required></textarea></div>
+      <div class="contact-honeypot" aria-hidden="true"><label for="contact-gotcha">Leave this field blank</label><input id="contact-gotcha" type="text" name="_gotcha" tabindex="-1" autocomplete="off"></div>
+      <div class="contact-send"><button type="submit" id="contact-submit">Send message <span aria-hidden="true">↗</span></button><p class="contact-note">Messages are handled by Formspree. Your email address is used to reply to you.</p></div>
+      <p id="contact-status" class="contact-status" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="section-bottom-actions">
+  <a href="#top" id="close-contact">
+    ↑ Close contact form &amp; return to top
+  </a>
+</div>
+
+  </section>
   <footer id="foot"></footer>
 </div>
 <div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="Enlarged photo" tabindex="-1"><button class="zoom-close" id="zoom-close" type="button">Close ×</button><img id="zimg" alt=""><span id="zcap"></span><a class="zoom-link" id="zoom-link" href="#">Permanent link to this post</a></div>
@@ -146,7 +227,7 @@ const SITE = {
   name: "Semerdjian",
   tagline: "Things I Like",
   isSample: true,
-  about: "Hi, I'm Greg. I live in Pierce County and built this site to learn soome new skills and post photos of things I like. Thanks for stopping by!",
+  about: "Hi, I'm Greg. I live in Pierce County and am currently unemployed. I take pictures of ordinary mornings and write down what I notice. This is where I keep them.",
   linkedin: "https://www.linkedin.com/in/gsemerdjian/",
   resumePdf: "" // Disabled: the existing PDF contains an excluded prior role.
 };
@@ -321,9 +402,7 @@ const RESUME = {
           "name": "AI Tools",
           "items": [
             "ChatGPT",
-            "Claude",
-            "ComfyUI",
-            "Draw Things"
+            "Claude"
           ]
         },
         {
@@ -356,9 +435,9 @@ const RESUME = {
       ],
       "contact": [
         {
-          "label": "Email",
-          "value": "gcsemerd@gmail.com",
-          "url": "mailto:gcsemerd@gmail.com"
+          "label": "Contact",
+          "value": "Send a message",
+          "url": "#contact"
         },
         {
           "label": "LinkedIn",
@@ -427,7 +506,8 @@ document.getElementById("about-text").textContent = SITE.about;
 document.getElementById("links").innerHTML =
   `<a href="#about">About me</a>` +
   (SITE.linkedin ? `<a href="${esc(SITE.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : "") +
-  `<a href="#resume" id="resume-link" aria-controls="resume" aria-expanded="false">Resume</a>`;
+  `<a href="#resume" id="resume-link" aria-controls="resume" aria-expanded="false">Resume</a>` +
+  `<a href="#contact" id="contact-link" aria-controls="contact" aria-expanded="false">Contact</a>`;
 
 const wall = document.getElementById("wall");
 const pager = document.getElementById("photo-pager");
@@ -509,7 +589,8 @@ resumeLink.addEventListener("click", e => {
   openResume();
   history.replaceState(null, "", "#resume");
 });
-document.getElementById("resume-close").addEventListener("click", e => {
+document.querySelectorAll("#resume-close, #resume-close-bottom").forEach(link => {
+  link.addEventListener("click", e => {
   e.preventDefault();
   revealObserver?.disconnect();
   resume.hidden = true;
@@ -518,6 +599,7 @@ document.getElementById("resume-close").addEventListener("click", e => {
   resumeLink.setAttribute("aria-expanded", "false");
   window.scrollTo({top:0,behavior:reduceMotion ? "auto":"smooth"});
   history.replaceState(null, "", location.pathname + location.search);
+  });
 });
 // Allow someone to share a direct link ending in #resume.
 if (location.hash === "#resume") {
@@ -588,6 +670,44 @@ if (requestedPost) {
   returnUrl = pageUrl(currentPage);
   openPost(requestedPost,{focus:false});
 }
+
+/* ---------- Contact form: submit without leaving the page ---------- */
+const contactForm = document.getElementById("contact-form");
+const contactStatus = document.getElementById("contact-status");
+const contactSubmit = document.getElementById("contact-submit");
+contactForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!contactForm.reportValidity()) return;
+  contactSubmit.disabled = true;
+  contactStatus.textContent = "Sending your message…";
+  delete contactStatus.dataset.state;
+  try {
+    const response = await fetch(contactForm.action, {
+      method: "POST",
+      body: new FormData(contactForm),
+      headers: { "Accept": "application/json" }
+    });
+    if (!response.ok) throw new Error("Form service returned " + response.status);
+    contactForm.reset();
+    contactStatus.dataset.state = "success";
+    contactStatus.textContent = "Message sent. Thank you for getting in touch.";
+  } catch (error) {
+    contactStatus.dataset.state = "error";
+    contactStatus.textContent = "The message couldn't be sent. Please try again in a moment.";
+    console.error("Contact form submission failed:", error);
+  } finally {
+    contactSubmit.disabled = false;
+  }
+});
+// Close the contact form and return to the top
+document.getElementById("close-contact").addEventListener("click", () => {
+  document.getElementById("contact").hidden = true; document.getElementById("contact-link").setAttribute("aria-expanded", "false");
+});
+// Reopen the contact form when Contact is clicked
+document.getElementById("contact-link").addEventListener("click", () => {
+  document.getElementById("contact").hidden = false;
+  document.getElementById("contact-link").setAttribute("aria-expanded", "true");
+});
 </script>
 </body>
 </html>
