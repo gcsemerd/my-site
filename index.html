@@ -6,7 +6,6 @@
 <title>Field Notes</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=DM+Mono:wght@400&display=swap">
 <style>
-/* Layout: a single wall of photos, each with a short caption underneath. */
 :root{
   --bg:#ECEFEA; --surface:#F7F9F6; --fg:#14191B; --muted:#5B6568; --line:#CBD1CB; --accent:#2740E8;
   --f-display:'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif;
@@ -22,29 +21,28 @@
   --bg:#0E1213; --surface:#161B1D; --fg:#E7ECE8; --muted:#8E9A9C; --line:#2A3235; --accent:#7E90FF; color-scheme:dark;
 }
 *{box-sizing:border-box}
+html{color-scheme:light}
 body{
-  background:var(--bg); color:var(--fg); font-family:var(--f-body); font-size:1.0625rem; line-height:1.5;
+  margin:0; background:var(--bg); color:var(--fg); font-family:var(--f-body); font-size:1.0625rem; line-height:1.5;
   padding-block:0 4rem;
   padding-left:max(16px, env(safe-area-inset-left, 0px));
   padding-right:max(16px, env(safe-area-inset-right, 0px));
 }
+img{max-width:100%}
+[hidden]{display:none!important}
 .wrap{max-width:1100px; margin:0 auto}
 :focus-visible{outline:2px solid var(--accent); outline-offset:3px}
-
 header{padding-block:3rem 2.5rem; display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:.5rem 2rem}
 h1{font-family:var(--f-display); font-weight:700; font-size:clamp(2rem,6vw,3.25rem); letter-spacing:-.03em; line-height:1; margin:0}
 .tag{margin:0; color:var(--muted); max-width:36ch}
-
-/* masonry wall */
-.wall{columns:3 260px; column-gap:1.5rem}
-.card{break-inside:avoid; margin:0 0 2rem; display:block}
+.wall{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:2rem 1.5rem; align-items:start}
+.card{margin:0}
 .card img{width:100%; display:block; object-fit:cover; background:var(--surface); cursor:zoom-in}
 .card img + img{margin-top:.5rem}
 .card p{margin:.6rem 0 .25rem}
 .card time{font-family:var(--f-mono); font-size:.75rem; color:var(--muted)}
 .card.note{border-top:2px solid var(--accent); padding-top:.75rem}
 .card.note p{font-family:var(--f-display); font-weight:500; font-size:1.3rem; line-height:1.2; letter-spacing:-.01em; margin-top:0}
-
 .links{display:flex; flex-wrap:wrap; gap:.25rem 1.5rem; font-family:var(--f-mono); font-size:.8125rem}
 .links a{color:var(--fg); text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:4px; text-decoration-thickness:1px}
 .links a:hover{text-decoration-color:var(--accent); color:var(--accent)}
@@ -52,16 +50,45 @@ h1{font-family:var(--f-display); font-weight:700; font-size:clamp(2rem,6vw,3.25r
 .about h2{font-family:var(--f-display); font-weight:700; font-size:1.5rem; letter-spacing:-.02em; margin:0 0 .75rem}
 .about p{margin:0; font-size:1.125rem; line-height:1.6}
 .sample-note{font-family:var(--f-mono); font-size:.75rem; color:var(--muted); margin:0 0 2rem}
-
-/* enlarge */
 .zoom{position:fixed; inset:0; z-index:20; background:color-mix(in srgb, var(--bg) 94%, transparent); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.75rem; padding:1rem; cursor:zoom-out}
-.zoom[hidden]{display:none}
 .zoom img{max-width:100%; max-height:80vh; object-fit:contain}
 .zoom span{max-width:60ch; text-align:center}
 footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(--muted)}
-</style>
 
-<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+/* --- Unfolding résumé: inherits the site's fonts and palette. --- */
+.resume{margin-top:3.5rem; padding-top:2rem; border-top:2px solid var(--accent); scroll-margin-top:1.5rem}
+.resume-topline{font: .75rem var(--f-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--accent); margin:0 0 .75rem}
+.resume h2{font-family:var(--f-display); font-size:clamp(2rem,5vw,3rem); line-height:1.08; letter-spacing:-.03em; margin:.1rem 0 .5rem}
+.resume-subtitle{color:var(--muted); font-size:1.2rem; margin:0 0 1rem}
+.resume-tools{display:flex; flex-wrap:wrap; gap:1.25rem; margin:0 0 1.8rem; font:.8rem var(--f-mono)}
+.resume-tools a{color:var(--accent); text-underline-offset:4px}
+.resume-part{max-width:790px; margin:0 0 2rem; border-top:1px solid var(--line); padding-top:1.25rem}
+.resume-part h3{font-family:var(--f-display); font-size:1.35rem; margin:0 0 .85rem; letter-spacing:-.015em}
+.resume-part p{margin:.35rem 0 1rem; line-height:1.65}
+.resume-entry{margin:0 0 1.5rem}
+.resume-entry h4{font-family:var(--f-display); font-weight:500; font-size:1.14rem; line-height:1.3; margin:0}
+.resume-meta{font:.78rem var(--f-mono); color:var(--muted); margin:.25rem 0 .65rem!important}
+.resume-entry ul{padding-left:1.4rem; margin:.4rem 0}
+.resume-entry li{margin-bottom:.35rem}
+.resume-skills{display:flex; flex-wrap:wrap; gap:.5rem; list-style:none; padding:0; margin:0}
+.resume-skills li{border:1px solid var(--line); padding:.35rem .7rem; font:.78rem var(--f-mono)}
+.resume-skill-group{margin:0 0 1.4rem}
+.resume-skill-group h4{font:500 1rem var(--f-display);margin:0 0 .65rem}
+.resume-contact a{color:var(--accent);text-underline-offset:4px}
+/* JavaScript only applies reveal styles when animations are enabled. */
+.resume.animate .resume-part{opacity:0; transform:translateY(24px); transition:opacity .7s ease,transform .7s ease}
+.resume.animate .resume-part.is-visible{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){
+  html:focus-within{scroll-behavior:auto}
+  .resume.animate .resume-part{opacity:1;transform:none;transition:none}
+}
+@media print{
+  .wall,.about,.zoom,.links,.sample-note,.resume-tools,footer{display:none!important}
+  .resume{display:block!important;border:0;margin:0;padding:0}
+  .resume.animate .resume-part{opacity:1!important;transform:none!important}
+  body{background:#fff;color:#000}
+}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -78,6 +105,19 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
     <h2 id="about-h">About me</h2>
     <p id="about-text"></p>
   </section>
+
+  <!-- The résumé starts hidden. Clicking Resume opens it below About me. -->
+  <section class="resume" id="resume" aria-labelledby="resume-h" hidden>
+    <p class="resume-topline">Professional background</p>
+    <h2 id="resume-h">Résumé</h2>
+    <p class="resume-subtitle" id="resume-subtitle"></p>
+    <div class="resume-tools">
+      <a href="resume.pdf" id="resume-download" download>Download PDF</a>
+      <a href="#top" id="resume-close">Close résumé ↑</a>
+    </div>
+    <div id="resume-content"></div>
+  </section>
+
   <footer id="foot"></footer>
 </div>
 <div class="zoom" id="zoom" hidden role="dialog" aria-label="Enlarged photo"><img id="zimg" alt=""><span id="zcap"></span></div>
@@ -85,32 +125,250 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
 <script>
 /* ==========================================================
    EDIT ME. Newest first.
-   Each post has: date, text (the snippet), and optional photos.
-   - photos: a file path (photos/beach.jpg), a full URL, or a data: URI.
-   - A post with text and no photos shows as a text-only note.
+   Each post has: date, text, and optional photos.
    ========================================================== */
 const SITE = {
   name: "Semerdjian",
   tagline: "Things I Like",
   isSample: true,
   about: "Hi, I'm Greg. I live in Pierce County and am currently unemployed. I take pictures of ordinary mornings and write down what I notice. This is where I keep them.",
-  /* LinkedIn: your profile URL. Resume: a link to a PDF (a file path once you self-host, or a shared link). */
-  linkedin: "https://www.linkedin.com/in/your-name",
-  resume: "resume.pdf"
+  linkedin: "https://www.linkedin.com/in/gsemerdjian/",
+  resumePdf: "" // Disabled: the existing PDF contains an excluded prior role.
+};
+
+/* APPROVED RÉSUMÉ CONTENT — edit text below as needed. */
+const RESUME = {
+  "subtitle": "Professional experience & qualifications",
+  "sections": [
+    {
+      "title": "Professional Summary",
+      "paragraphs": [
+        "Building lasting client relationships. Delivering measurable business results.",
+        "B2B SaaS account management professional with more than a decade of experience managing enterprise relationships, improving client retention, and driving revenue growth.",
+        "Proven success managing high-value client portfolios, including accounts representing approximately 15% of company revenue, while maintaining renewal rates exceeding 90%.",
+        "Experienced in translating complex performance data into actionable business strategies, leading executive-level reviews, and helping organizations maximize the value of their technology investments."
+      ]
+    },
+    {
+      "title": "Professional Experience",
+      "jobs": [
+        {
+          "role": "Business Advisor",
+          "organization": "CallSource · Calabasas, California · Remote",
+          "dates": "2024–2026",
+          "description": "Managed post-sale client success for a portfolio of more than 100 professional services and healthcare accounts, focusing on retention, product adoption, and long-term account growth.",
+          "highlights": [
+            "Maintained a 90%+ contract renewal rate through proactive relationship management, strategic client engagement, and data-driven quarterly business reviews.",
+            "Analyzed marketing campaign performance and agent productivity to identify improvement opportunities and recommend strategies aligned with client objectives.",
+            "Led comprehensive quarterly business reviews, translating performance metrics into actionable recommendations and measurable business priorities.",
+            "Delivered ongoing product training and client coaching to increase platform adoption and improve operational efficiency.",
+            "Conducted account health assessments to identify expansion opportunities, address potential churn risks, and support portfolio revenue growth."
+          ]
+        },
+        {
+          "role": "Account Executive",
+          "organization": "iovox · London, United Kingdom · Remote",
+          "dates": "2022–2024",
+          "description": "Managed business development and existing client relationships across international markets, combining new-business acquisition with strategic account growth and retention.",
+          "highlights": [
+            "Consistently achieved new-business sales quotas while identifying and closing expansion opportunities within existing accounts.",
+            "Conducted market research and prospecting to develop sales pipelines across domestic and international markets, including Australia and Canada.",
+            "Delivered sales presentations and quarterly business reviews that supported revenue growth and strengthened long-term client relationships.",
+            "Managed a diverse, global client portfolio, tailoring technology solutions to different industries and business requirements.",
+            "Led the migration of client accounts from CallSource to iovox, coordinating data integrity, platform connectivity, and service continuity to minimize operational disruption."
+          ]
+        },
+        {
+          "role": "Key Accounts Manager",
+          "organization": "CallSource · Westlake Village, California",
+          "dates": "2013–2022",
+          "description": "Directed strategic relationships across an enterprise-focused portfolio representing approximately 15% of CallSource's annual revenue, including the company's single largest client.",
+          "highlights": [
+            "Managed more than 100 client accounts throughout the complete customer lifecycle, including onboarding, implementation, integration, training, and technical support.",
+            "Maintained a 90% client retention rate through relationship management, proactive issue resolution, and consistent engagement.",
+            "Supported large-scale deployments of new technology products for enterprise customers, coordinating implementation across multiple systems and stakeholders.",
+            "Managed project timelines, training schedules, and cross-platform operational processes to ensure successful integration and adoption.",
+            "Coordinated troubleshooting and issue resolution across internal teams and third-party vendors, minimizing service interruptions.",
+            "Identified account discrepancies and operational risks, collaborating directly with clients to develop timely solutions."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Advisory Experience",
+      "jobs": [
+        {
+          "role": "Advisory Board Member",
+          "organization": "Z. Victor Paparigian and Marion V. Paparigian Charitable Foundation · Remote",
+          "dates": "2010–Present",
+          "description": "Provide ongoing advisory support to a nonprofit organization dedicated to funding summer camp scholarships for children.",
+          "highlights": [
+            "Participate in quarterly advisory discussions supporting organizational activities and scholarship initiatives.",
+            "Present annual financial and operational updates to the Board of Directors."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Core Competencies",
+      "groups": [
+        {
+          "name": "Client Success & Account Management",
+          "items": [
+            "Enterprise Account Management",
+            "B2B SaaS Customer Success",
+            "Client Retention",
+            "Quarterly Business Reviews",
+            "Client Coaching",
+            "Presentations",
+            "SaaS Support"
+          ]
+        },
+        {
+          "name": "Business Development & Strategy",
+          "items": [
+            "Revenue Growth",
+            "Account Expansion",
+            "Client Relationship Management",
+            "Sales Presentations",
+            "Strategic Account Planning",
+            "P&L Analysis"
+          ]
+        },
+        {
+          "name": "Data, Analytics & Reporting",
+          "items": [
+            "Data Analysis",
+            "SQL",
+            "Google Analytics 4 (GA4)",
+            "Microsoft Excel",
+            "CRM Reporting",
+            "Performance Metrics",
+            "KPI Analysis"
+          ]
+        },
+        {
+          "name": "Project & Cross-Functional Leadership",
+          "items": [
+            "Project Management",
+            "Cross-Functional Team Leadership",
+            "Client Implementation",
+            "Platform Integration",
+            "Product Training",
+            "Issue Resolution"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Technical Proficiency",
+      "groups": [
+        {
+          "name": "CRM & Sales",
+          "items": [
+            "Salesforce",
+            "HubSpot",
+            "SugarCRM",
+            "Zoho"
+          ]
+        },
+        {
+          "name": "Analytics & Reporting",
+          "items": [
+            "SQL",
+            "GA4",
+            "Domo",
+            "Excel"
+          ]
+        },
+        {
+          "name": "Productivity & Collaboration",
+          "items": [
+            "Microsoft 365",
+            "Google Workspace",
+            "Smartsheet"
+          ]
+        },
+        {
+          "name": "Project Management",
+          "items": [
+            "Wrike"
+          ]
+        },
+        {
+          "name": "Operating Systems",
+          "items": [
+            "Windows",
+            "macOS"
+          ]
+        },
+        {
+          "name": "AI Tools",
+          "items": [
+            "ChatGPT",
+            "Claude"
+          ]
+        },
+        {
+          "name": "Additional Platforms",
+          "items": [
+            "AutoID"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Education",
+      "jobs": [
+        {
+          "role": "Master of Business Administration (MBA)",
+          "organization": "California Lutheran University · Thousand Oaks, California",
+          "highlights": []
+        },
+        {
+          "role": "Bachelor of Arts, Communication",
+          "organization": "California Lutheran University · Thousand Oaks, California",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "title": "Let's Connect",
+      "paragraphs": [
+        "Interested in discussing opportunities in account management, customer success, or business development? I'd welcome the conversation."
+      ],
+      "contact": [
+        {
+          "label": "Email",
+          "value": "gcsemerd@gmail.com",
+          "url": "mailto:gcsemerd@gmail.com"
+        },
+        {
+          "label": "LinkedIn",
+          "value": "LinkedIn profile",
+          "url": "https://www.linkedin.com/in/gsemerdjian/"
+        },
+        {
+          "label": "Location",
+          "value": "University Place, Washington"
+        }
+      ]
+    }
+  ]
 };
 
 const POSTS = [
-{ date:"2026-06-17", text:"Mackerel sky and the bridge at dusk.", photos:["photos/day-island-beach-scene.jpeg"] },
-{ date:"2026-06-15", text:"Streets covered in paper flags in Cabo.", photos:["photos/colorful-street-cabo.jpeg"] },
-{ date:"2026-10-31", text:"Waves rolling into the cove.", photos:["photos/cabo-sunset-view.jpeg"] },
-{ date:"2026-11-01", text:"A visitor out front.", photos:["photos/deer-on-street.jpeg"] },
-{ date:"2026-07-28", text:"Ribs, done.", photos:["photos/grilled-ribs-on-grill.jpeg"] },
-{ date:"2026-06-18", text:"Local resident.", photos:["photos/lizard-on-path.jpeg"] },
-{ date:"2026-01-05", text:"It snowed.", photos:["photos/snowy-backyard-view.jpeg"] },
-  
+  { date:"2026-06-17", text:"Waves rolling into the cove.", photos:["photos/cabo-sunset-view.jpeg"] },
+  { date:"2026-06-15", text:"Streets covered in paper flags in Cabo.", photos:["photos/colorful-street-cabo.jpeg"] },
+  { date:"2026-10-31", text:"Halloween sunset from Day Island.", photos:["photos/day-island-beach-scene.jpeg"] },
+  { date:"2026-11-01", text:"A visitor out front.", photos:["photos/deer-on-street.jpeg"] },
+  { date:"2026-07-28", text:"Ribs, done.", photos:["photos/grilled-ribs-on-grill.jpeg"] },
+  { date:"2026-06-18", text:"Local resident.", photos:["photos/lizard-on-path.jpeg"] },
+  { date:"2026-01-05", text:"It snowed.", photos:["photos/snowy-backyard-view.jpeg"] }
 ];
+POSTS.sort((a, b) => b.date.localeCompare(a.date));
 
-/* ---------- sample picture generator (delete once you use real photos) ---------- */
+/* ---------- sample picture generator (original, retained) ---------- */
 function scene(n, ratio){
   const pal = [
     ["#F6C28B","#E7835A","#6E4B7A","#2D2E5A"], ["#BFD3E6","#7FA1C4","#4A6A8F","#27384F"],
@@ -132,8 +390,8 @@ function scene(n, ratio){
   return {src:"data:image/svg+xml;utf8," + encodeURIComponent(svg), ratio};
 }
 
-/* ---------- render ---------- */
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+/* ---------- render website ---------- */
+const esc = s => String(s).replace(/[&<>\"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmt = d => new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 document.getElementById("name").textContent = SITE.name;
 document.getElementById("tag").textContent = SITE.tagline;
@@ -144,17 +402,88 @@ document.getElementById("about-text").textContent = SITE.about;
 document.getElementById("links").innerHTML =
   `<a href="#about">About me</a>` +
   (SITE.linkedin ? `<a href="${esc(SITE.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : "") +
-  (SITE.resume ? `<a href="${esc(SITE.resume)}" target="_blank" rel="noopener">Resume</a>` : "");
+  `<a href="#resume" id="resume-link" aria-controls="resume" aria-expanded="false">Resume</a>`;
 
 document.getElementById("wall").innerHTML = POSTS.map(p => {
   const imgs = (p.photos||[]).map(ph => {
     const o = typeof ph === "string" ? {src:ph} : ph;
-    return `<img src="${o.src}" alt="${esc(p.text)}" loading="lazy" ${o.ratio ? `style="aspect-ratio:${o.ratio}"` : ""}>`;
+    return `<img src="${esc(o.src)}" alt="${esc(p.text)}" loading="lazy" ${o.ratio ? `style="aspect-ratio:${o.ratio}"` : ""}>`;
   }).join("");
   return `<article class="card${imgs ? "" : " note"}">${imgs}<p>${esc(p.text)}</p><time datetime="${p.date}">${fmt(p.date)}</time></article>`;
 }).join("");
 
-/* enlarge on click */
+/* ---------- render résumé from editable data ---------- */
+const resume = document.getElementById("resume");
+const resumeLink = document.getElementById("resume-link");
+const pdfLink = document.getElementById("resume-download");
+document.getElementById("resume-subtitle").textContent = RESUME.subtitle;
+if (!SITE.resumePdf) pdfLink.hidden = true;
+else pdfLink.href = SITE.resumePdf;
+
+document.getElementById("resume-content").innerHTML = RESUME.sections.map(section => `
+  <section class="resume-part">
+    <h3>${esc(section.title)}</h3>
+    ${(section.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join("")}
+    ${(section.jobs || []).map(job => `
+      <div class="resume-entry">
+        <h4>${esc(job.role)}${job.organization ? ` · ${esc(job.organization)}` : ""}</h4>
+        ${job.dates ? `<p class="resume-meta">${esc(job.dates)}</p>` : ""}
+        ${job.description ? `<p>${esc(job.description)}</p>` : ""}
+        ${job.highlights?.length ? `<ul>${job.highlights.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
+      </div>
+    `).join("")}
+    ${(section.groups || []).map(group => `<div class="resume-skill-group"><h4>${esc(group.name)}</h4><ul class="resume-skills">${group.items.map(skill => `<li>${esc(skill)}</li>`).join("")}</ul></div>`).join("")}
+    ${(section.contact || []).map(item => `<p class="resume-contact"><strong>${esc(item.label)}:</strong> ${item.url ? `<a href="${esc(item.url)}" ${item.url.startsWith('https:') ? 'target="_blank" rel="noopener"' : ''}>${esc(item.value)}</a>` : esc(item.value)}</p>`).join("")}
+    ${section.skills?.length ? `<ul class="resume-skills">${section.skills.map(skill => `<li>${esc(skill)}</li>`).join("")}</ul>` : ""}
+  </section>
+`).join("");
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let revealObserver;
+function openResume({ scroll = true } = {}){
+  if (resume.hidden) {
+    resume.hidden = false;
+    resumeLink.setAttribute("aria-expanded", "true");
+    if (!reduceMotion && "IntersectionObserver" in window) {
+      resume.classList.add("animate");
+      revealObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            revealObserver.unobserve(entry.target); // Stay visible after reveal.
+          }
+        });
+      }, { threshold: 0.08, rootMargin: "0px 0px -30px 0px" });
+      resume.querySelectorAll(".resume-part").forEach(part => revealObserver.observe(part));
+    }
+  }
+  if (scroll) resume.scrollIntoView({behavior:reduceMotion ? "auto":"smooth",block:"start"});
+}
+resumeLink.addEventListener("click", e => {
+  e.preventDefault();
+  openResume();
+  history.replaceState(null, "", "#resume");
+});
+document.getElementById("resume-close").addEventListener("click", e => {
+  e.preventDefault();
+  revealObserver?.disconnect();
+  resume.hidden = true;
+  resume.classList.remove("animate");
+  resume.querySelectorAll(".resume-part").forEach(part => part.classList.remove("is-visible"));
+  resumeLink.setAttribute("aria-expanded", "false");
+  window.scrollTo({top:0,behavior:reduceMotion ? "auto":"smooth"});
+  history.replaceState(null, "", location.pathname + location.search);
+});
+// Allow someone to share a direct link ending in #resume.
+if (location.hash === "#resume") {
+  openResume({scroll:false});
+  requestAnimationFrame(() => resume.scrollIntoView({behavior:"auto",block:"start"}));
+}
+window.addEventListener("hashchange", () => {
+  if (location.hash === "#resume") openResume();
+});
+
+/* ---------- photo enlarge on click ---------- */
 const zoom = document.getElementById("zoom"), zimg = document.getElementById("zimg"), zcap = document.getElementById("zcap");
 document.getElementById("wall").addEventListener("click", e => {
   if(e.target.tagName !== "IMG") return;
