@@ -72,7 +72,7 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
     </div>
     <nav class="links" id="links" aria-label="About and links"></nav>
   </header>
-  <p class="sample-note" id="sample" hidden>Sample posts. The pictures are drawn placeholders, ready to be swapped for yours.</p>
+  <p class="sample-note" id="sample" hidden>Just some pictures taken in and around University Place, WA.</p>
   <main class="wall" id="wall"></main>
   <section class="about" id="about" aria-labelledby="about-h">
     <h2 id="about-h">About me</h2>
@@ -90,23 +90,24 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
    - A post with text and no photos shows as a text-only note.
    ========================================================== */
 const SITE = {
-  name: "Field Notes",
-  tagline: "Pictures and a few words about them.",
+  name: "Semerdjian",
+  tagline: "Things I Like",
   isSample: true,
-  about: "Hi, I'm [your name]. I live in [city] and work as a [what you do]. I take pictures of ordinary mornings and write down what I notice. This is where I keep them.",
+  about: "Hi, I'm Greg. I live in Pierce County and am currently unemployed. I take pictures of ordinary mornings and write down what I notice. This is where I keep them.",
   /* LinkedIn: your profile URL. Resume: a link to a PDF (a file path once you self-host, or a shared link). */
   linkedin: "https://www.linkedin.com/in/your-name",
   resume: "resume.pdf"
 };
 
 const POSTS = [
-  { date:"2026-11-02", text:"Gap in the fog on the morning ferry.", photos:[scene(1,"4/5")] },
-  { date:"2026-10-30", text:"Note to self: bring a thermos next time.", photos:[] },
-  { date:"2026-10-28", text:"Ten minutes after the rain stopped.", photos:[scene(3,"1/1")] },
-  { date:"2026-10-24", text:"Bakery line, 8:05 a.m. The cardamom buns are worth it.", photos:[scene(4,"3/2")] },
-  { date:"2026-10-19", text:"Last light on the ridge, then gone.", photos:[scene(5,"4/5"), scene(6,"4/5")] },
-  { date:"2026-10-11", text:"Nobody warned us the lake was under a foot of snow.", photos:[scene(7,"1/1")] },
-  { date:"2026-10-05", text:"Saturday market. Bought too many peaches.", photos:[scene(2,"3/2")] }
+{ date:"2026-10-31", text:"Mackerel sky and the bridge at dusk.", photos:["photos/day-island-beach-scene.jpeg"] },
+{ date:"2026-06-15", text:"Streets covered in paper flags in Cabo.", photos:["photos/colorful-street-cabo.jpeg"] },
+{ date:"2026-06-17", text:"Waves rolling into the cove.", photos:["photos/cabo-sunset-view.jpeg"] },
+{ date:"2026-11-01", text:"A visitor out front.", photos:["photos/deer-on-street.jpeg"] },
+{ date:"2026-07-28", text:"Ribs, done.", photos:["photos/grilled-ribs-on-grill.jpeg"] },
+{ date:"2026-06-18", text:"Local resident.", photos:["photos/lizard-on-path.jpeg"] },
+{ date:"2026-01-05", text:"It snowed.", photos:["photos/snowy-backyard-view.jpeg"] },
+  
 ];
 
 /* ---------- sample picture generator (delete once you use real photos) ---------- */
