@@ -55,6 +55,22 @@ h1{font-family:var(--f-display); font-weight:700; font-size:clamp(2rem,6vw,3.25r
 .zoom span{max-width:60ch; text-align:center}
 footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(--muted)}
 
+
+/* --- Six-at-a-time photo pagination --- */
+.photo-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.8rem 1rem;padding:1.75rem .25rem 0;font:.78rem var(--f-mono)}
+.photo-pager a{color:var(--fg);text-decoration:none;border:1px solid var(--line);padding:.45rem .75rem;min-width:2.4rem;text-align:center}
+.photo-pager a:hover,.photo-pager a:focus-visible{color:var(--accent);border-color:var(--accent)}
+.photo-pager a[aria-current="page"]{color:var(--bg);background:var(--fg);border-color:var(--fg)}
+.photo-pager .disabled{color:var(--muted);opacity:.5;border:1px solid var(--line);padding:.45rem .75rem}
+.photo-pager .page-status{color:var(--muted)}
+.post-permalink{font:.7rem var(--f-mono);color:var(--muted);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.post-permalink:hover{color:var(--accent)}
+.photo-actions{margin-top:.4rem}
+.zoom{cursor:default}
+.zoom img{cursor:zoom-out}
+.zoom-close{align-self:flex-end;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:.45rem .8rem;font:.75rem var(--f-mono);cursor:pointer}
+.zoom-link{color:var(--accent);font:.75rem var(--f-mono);text-underline-offset:3px}
+
 /* --- Unfolding résumé: inherits the site's fonts and palette. --- */
 .resume{margin-top:3.5rem; padding-top:2rem; border-top:2px solid var(--accent); scroll-margin-top:1.5rem}
 .resume-topline{font: .75rem var(--f-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--accent); margin:0 0 .75rem}
@@ -101,6 +117,7 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
   </header>
   <p class="sample-note" id="sample" hidden>Just some pictures taken in and around University Place, WA.</p>
   <main class="wall" id="wall"></main>
+  <nav class="photo-pager" id="photo-pager" aria-label="Photo pages"></nav>
   <section class="about" id="about" aria-labelledby="about-h">
     <h2 id="about-h">About me</h2>
     <p id="about-text"></p>
@@ -120,18 +137,16 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
 
   <footer id="foot"></footer>
 </div>
-<div class="zoom" id="zoom" hidden role="dialog" aria-label="Enlarged photo"><img id="zimg" alt=""><span id="zcap"></span></div>
+<div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="Enlarged photo" tabindex="-1"><button class="zoom-close" id="zoom-close" type="button">Close ×</button><img id="zimg" alt=""><span id="zcap"></span><a class="zoom-link" id="zoom-link" href="#">Permanent link to this post</a></div>
 
+<script src="js/posts.js"></script>
 <script>
-/* ==========================================================
-   EDIT ME. Newest first.
-   Each post has: date, text, and optional photos.
-   ========================================================== */
+/* Site and résumé settings below. Add photos in posts.js. */
 const SITE = {
   name: "Semerdjian",
   tagline: "Things I Like",
   isSample: true,
-  about: "Hi, I'm Greg. I live in Pierce County and am currently unemployed. I take pictures of ordinary mornings and write down what I notice. This is where I keep them.",
+  about: "Hi, I'm Greg. I live in Pierce County and built this site to learn soome new skills and post photos of things I like. Thanks for stopping by!",
   linkedin: "https://www.linkedin.com/in/gsemerdjian/",
   resumePdf: "" // Disabled: the existing PDF contains an excluded prior role.
 };
@@ -306,7 +321,9 @@ const RESUME = {
           "name": "AI Tools",
           "items": [
             "ChatGPT",
-            "Claude"
+            "Claude",
+            "ComfyUI",
+            "Draw Things"
           ]
         },
         {
@@ -357,16 +374,24 @@ const RESUME = {
   ]
 };
 
-const POSTS = [
-  { date:"2026-06-17", text:"Waves rolling into the cove.", photos:["photos/cabo-sunset-view.jpeg"] },
-  { date:"2026-06-15", text:"Streets covered in paper flags in Cabo.", photos:["photos/colorful-street-cabo.jpeg"] },
-  { date:"2026-10-31", text:"Halloween sunset from Day Island.", photos:["photos/day-island-beach-scene.jpeg"] },
-  { date:"2026-11-01", text:"A visitor out front.", photos:["photos/deer-on-street.jpeg"] },
-  { date:"2026-07-28", text:"Ribs, done.", photos:["photos/grilled-ribs-on-grill.jpeg"] },
-  { date:"2026-06-18", text:"Local resident.", photos:["photos/lizard-on-path.jpeg"] },
-  { date:"2026-01-05", text:"It snowed.", photos:["photos/snowy-backyard-view.jpeg"] }
-];
-POSTS.sort((a, b) => b.date.localeCompare(a.date));
+/* Validate permanent IDs and sort a COPY of the entries by date.
+   A date change only moves a post; its ?post= link stays stable. */
+const idSet = new Set();
+for (const post of POSTS) {
+  if (!post.id || idSet.has(post.id)) console.error("Post ID missing or duplicated:", post);
+  idSet.add(post.id);
+}
+const sortedPosts = [...POSTS].sort((a,b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+const POSTS_PER_PAGE = 6;
+const totalPages = Math.max(1, Math.ceil(sortedPosts.length / POSTS_PER_PAGE));
+const urlParams = new URLSearchParams(location.search);
+const requestedPost = sortedPosts.find(p => p.id === urlParams.get("post"));
+const requestedPage = Number(urlParams.get("page"));
+const initialPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+// A permanent post URL automatically locates its current page, even if backdated posts are added.
+let currentPage = requestedPost
+  ? Math.floor(sortedPosts.indexOf(requestedPost) / POSTS_PER_PAGE) + 1
+  : Math.min(initialPage, totalPages);
 
 /* ---------- sample picture generator (original, retained) ---------- */
 function scene(n, ratio){
@@ -396,7 +421,7 @@ const fmt = d => new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"shor
 document.getElementById("name").textContent = SITE.name;
 document.getElementById("tag").textContent = SITE.tagline;
 document.getElementById("sample").hidden = !SITE.isSample;
-document.getElementById("foot").textContent = POSTS.length + " posts";
+document.getElementById("foot").textContent = sortedPosts.length + " posts";
 document.title = SITE.name;
 document.getElementById("about-text").textContent = SITE.about;
 document.getElementById("links").innerHTML =
@@ -404,13 +429,33 @@ document.getElementById("links").innerHTML =
   (SITE.linkedin ? `<a href="${esc(SITE.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : "") +
   `<a href="#resume" id="resume-link" aria-controls="resume" aria-expanded="false">Resume</a>`;
 
-document.getElementById("wall").innerHTML = POSTS.map(p => {
-  const imgs = (p.photos||[]).map(ph => {
-    const o = typeof ph === "string" ? {src:ph} : ph;
-    return `<img src="${esc(o.src)}" alt="${esc(p.text)}" loading="lazy" ${o.ratio ? `style="aspect-ratio:${o.ratio}"` : ""}>`;
+const wall = document.getElementById("wall");
+const pager = document.getElementById("photo-pager");
+const currentFile = location.pathname.split("/").pop() || "index.html";
+const pageUrl = n => `${currentFile}?page=${n}#wall`;
+const postUrl = id => `${currentFile}?post=${encodeURIComponent(id)}`;
+
+function renderPosts(page) {
+  currentPage = Math.min(Math.max(1,page),totalPages);
+  const start = (currentPage-1)*POSTS_PER_PAGE;
+  wall.innerHTML = sortedPosts.slice(start,start+POSTS_PER_PAGE).map(p => {
+    const imgs = (p.photos||[]).map(ph => {
+      const o = typeof ph === "string" ? {src:ph} : ph;
+      return `<img src="${esc(o.src)}" alt="${esc(p.text)}" loading="lazy" ${o.ratio ? `style="aspect-ratio:${esc(o.ratio)}"` : ""}>`;
+    }).join("");
+    return `<article class="card${imgs ? "" : " note"}" data-post-id="${esc(p.id)}">${imgs}<p>${esc(p.text)}</p><time datetime="${esc(p.date)}">${fmt(p.date)}</time><div class="photo-actions"><a class="post-permalink" href="${postUrl(p.id)}">Permalink ↗</a></div></article>`;
   }).join("");
-  return `<article class="card${imgs ? "" : " note"}">${imgs}<p>${esc(p.text)}</p><time datetime="${p.date}">${fmt(p.date)}</time></article>`;
-}).join("");
+  const pageItems = Array.from({length:totalPages}, (_,i)=>i+1).map(n =>
+    `<a href="${pageUrl(n)}" ${n===currentPage ? 'aria-current="page"' : ''} aria-label="Photo page ${n}">${n}</a>`
+  ).join("");
+  pager.innerHTML = totalPages > 1
+    ? `${currentPage>1 ? `<a href="${pageUrl(currentPage-1)}">← Previous</a>` : '<span class="disabled">← Previous</span>'}
+       ${pageItems}
+       ${currentPage<totalPages ? `<a href="${pageUrl(currentPage+1)}">Next →</a>` : '<span class="disabled">Next →</span>'}
+       <span class="page-status">${currentPage} of ${totalPages}</span>`
+    : "";
+}
+renderPosts(currentPage);
 
 /* ---------- render résumé from editable data ---------- */
 const resume = document.getElementById("resume");
@@ -483,14 +528,66 @@ window.addEventListener("hashchange", () => {
   if (location.hash === "#resume") openResume();
 });
 
-/* ---------- photo enlarge on click ---------- */
-const zoom = document.getElementById("zoom"), zimg = document.getElementById("zimg"), zcap = document.getElementById("zcap");
-document.getElementById("wall").addEventListener("click", e => {
-  if(e.target.tagName !== "IMG") return;
-  zimg.src = e.target.src; zimg.alt = e.target.alt; zcap.textContent = e.target.alt; zoom.hidden = false;
+/* ---------- Permalinks + existing photo zoom ---------- */
+const zoom = document.getElementById("zoom");
+const zimg = document.getElementById("zimg");
+const zcap = document.getElementById("zcap");
+const zlink = document.getElementById("zoom-link");
+const zoomClose = document.getElementById("zoom-close");
+let returnUrl = pageUrl(currentPage);
+let restoreFocus = null;
+function openPost(post, {updateUrl = false, focus = true} = {}) {
+  if (!post) return;
+  if (updateUrl) {
+    returnUrl = `${currentFile}?page=${currentPage}#wall`;
+    history.pushState(null,"",postUrl(post.id));
+  }
+  const firstPhoto = (post.photos||[])[0];
+  const photo = typeof firstPhoto === "string" ? firstPhoto : firstPhoto?.src;
+  if (!photo) return;
+  zimg.src = photo;
+  zimg.alt = post.text;
+  zcap.textContent = `${post.text} · ${fmt(post.date)}`;
+  zlink.href = postUrl(post.id);
+  zoom.hidden = false;
+  document.body.style.overflow = "hidden";
+  if(focus) zoomClose.focus();
+}
+function closePost({updateUrl = true} = {}) {
+  zoom.hidden = true;
+  document.body.style.overflow = "";
+  zimg.removeAttribute("src");
+  if (updateUrl && new URLSearchParams(location.search).has("post")) {
+    history.replaceState(null,"",returnUrl);
+  }
+  if (restoreFocus?.isConnected) restoreFocus.focus();
+}
+wall.addEventListener("click", e => {
+  if (e.target.tagName !== "IMG") return;
+  const card = e.target.closest("[data-post-id]");
+  restoreFocus = null;
+  openPost(sortedPosts.find(p => p.id === card?.dataset.postId),{updateUrl:true});
 });
-zoom.addEventListener("click", () => { zoom.hidden = true; });
-document.addEventListener("keydown", e => { if(e.key === "Escape") zoom.hidden = true; });
+zoomClose.addEventListener("click",()=>closePost());
+zoom.addEventListener("click",e=>{ if(e.target === zoom || e.target === zimg) closePost(); });
+document.addEventListener("keydown", e=>{if(e.key === "Escape" && !zoom.hidden) closePost();});
+window.addEventListener("popstate",()=>{
+  const params = new URLSearchParams(location.search);
+  const post = sortedPosts.find(p=>p.id===params.get("post"));
+  if (post) {
+    const newPage = Math.floor(sortedPosts.indexOf(post)/POSTS_PER_PAGE)+1;
+    if(newPage!==currentPage) renderPosts(newPage);
+    openPost(post,{focus:false});
+  } else {
+    closePost({updateUrl:false});
+    const page = Number(params.get("page"));
+    renderPosts(Number.isSafeInteger(page) && page>0?page:1);
+  }
+});
+if (requestedPost) {
+  returnUrl = pageUrl(currentPage);
+  openPost(requestedPost,{focus:false});
+}
 </script>
 </body>
 </html>
