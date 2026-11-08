@@ -190,7 +190,54 @@ footer {
     --editorial-indent: 14px;
   }
 }
+/* Minimal visitor counter — book page style */
+.visit-count {
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  margin-top: 2rem;
+  padding-right: 4px;
+}
+/* Minimal photo like controls */
+.photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
 
+.photo-like {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.photo-like:hover {
+  color: var(--fg);
+}
+
+.photo-like[aria-pressed="true"] {
+  color: #A65B61;
+}
+
+.like-count {
+  font-variant-numeric: tabular-nums;
+}
 </style>
 </head>
 <body>
@@ -258,8 +305,60 @@ footer {
 
   </section>
   <footer id="foot"></footer>
+  <div class="visit-count" id="visit-count" aria-label="Site visit count"></div>
+  <!-- Minimal visitor counter -->
+   <script>
+async function loadVisitCount() {
+  const counter = document.getElementById("visit-count");
+
+  try {
+    const response = await fetch(
+      "https://thingsisaw.goatcounter.com/counter/TOTAL.json"
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to retrieve visitor count");
+    }
+
+    const data = await response.json();
+    counter.textContent = data.count;
+  } catch (error) {
+    console.warn("Visitor counter unavailable:", error);
+  }
+}
+
+loadVisitCount();
+</script>
 </div>
-<div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="Enlarged photo" tabindex="-1"><button class="zoom-close" id="zoom-close" type="button">Close ×</button><img id="zimg" alt=""><span id="zcap"></span><a class="zoom-link" id="zoom-link" href="#">Permanent link to this post</a></div>
+
+<div class="zoom" id="zoom" hidden role="dialog"
+     aria-modal="true" aria-label="Enlarged photo" tabindex="-1">
+
+ <button class="zoom-close" id="zoom-close" type="button">
+  ← Back to gallery
+</button>
+
+  <img id="zimg" alt="">
+
+  <span id="zcap"></span>
+
+  <div class="zoom-actions">
+    <a class="zoom-link" id="zoom-link" href="#">
+      ↗ View post
+    </a>
+
+    <button
+      type="button"
+      class="photo-like"
+      id="zoom-like"
+      aria-pressed="false"
+      aria-label="Like this photograph">
+      ♡ <span class="like-count">0</span>
+    </button>
+  </div>
+
+</div>
+
 
 <script src="js/posts.js"></script>
 <script>
@@ -564,7 +663,27 @@ function renderPosts(page) {
       const o = typeof ph === "string" ? {src:ph} : ph;
       return `<img src="${esc(o.src)}" alt="${esc(p.text)}" loading="lazy" ${o.ratio ? `style="aspect-ratio:${esc(o.ratio)}"` : ""}>`;
     }).join("");
-    return `<article class="card${imgs ? "" : " note"}" data-post-id="${esc(p.id)}">${imgs}<p>${esc(p.text)}</p><time datetime="${esc(p.date)}">${fmt(p.date)}</time><div class="photo-actions"><a class="post-permalink" href="${postUrl(p.id)}">Permalink ↗</a></div></article>`;
+
+return `
+  <article class="card${imgs ? "" : " note"}" data-post-id="${esc(p.id)}">
+    ${imgs}
+    <p>${esc(p.text)}</p>
+    <time datetime="${esc(p.date)}">${fmt(p.date)}</time>
+
+    <div class="photo-actions">
+      <a class="post-permalink" href="${postUrl(p.id)}">↗ View post</a>
+
+      <button
+        type="button"
+        class="photo-like"
+        data-post-id="${esc(p.id)}"
+        aria-pressed="false"
+        aria-label="Like this photograph">
+        ♡ <span class="like-count">0</span>
+      </button>
+    </div>
+  </article>
+`;
   }).join("");
   const pageItems = Array.from({length:totalPages}, (_,i)=>i+1).map(n =>
     `<a href="${pageUrl(n)}" ${n===currentPage ? 'aria-current="page"' : ''} aria-label="Photo page ${n}">${n}</a>`
@@ -577,6 +696,111 @@ function renderPosts(page) {
     : "";
 }
 renderPosts(currentPage);
+
+
+/* Persistent photo Likes — Cloudflare D1 */
+
+const LIKES_API =
+  "https://thingsisaw-likes-api.gcsemerd.workers.dev/likes";
+
+// Give this browser a persistent random identifier.
+function getVoterId() {
+  const key = "thingsisaw-voter-id";
+  let id = localStorage.getItem(key);
+
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+
+  return id;
+}
+
+const voterId = getVoterId();
+
+// Communicate with Cloudflare.
+async function likesRequest(postId, action) {
+  const response = await fetch(LIKES_API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      post_id: postId,
+      voter_id: voterId,
+      action: action
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error("Likes API returned " + response.status);
+  }
+
+  return await response.json();
+}
+
+// Update the appearance of a heart and its count.
+function updateLikeButton(button, data) {
+  const liked = data.liked;
+
+  button.setAttribute("aria-pressed", String(liked));
+  button.querySelector(".like-count").textContent = data.likes;
+  button.firstChild.textContent = liked ? "♥ " : "♡ ";
+}
+
+// Load saved Likes for the currently visible photographs.
+async function loadLikes() {
+  const buttons = wall.querySelectorAll(".photo-like");
+
+  for (const button of buttons) {
+    button.disabled = true;
+
+    try {
+      const data = await likesRequest(
+        button.dataset.postId,
+        "status"
+      );
+
+      updateLikeButton(button, data);
+    } catch (error) {
+      console.warn("Unable to load likes:", error);
+    } finally {
+      button.disabled = false;
+    }
+  }
+}
+
+// Handle clicking a heart.
+wall.addEventListener("click", async event => {
+  const button = event.target.closest(".photo-like");
+
+  if (!button || !wall.contains(button) || button.disabled) {
+    return;
+  }
+
+  const postId = button.dataset.postId;
+  const alreadyLiked =
+    button.getAttribute("aria-pressed") === "true";
+
+  button.disabled = true;
+
+  try {
+    const data = await likesRequest(
+      postId,
+      alreadyLiked ? "unlike" : "like"
+    );
+
+    updateLikeButton(button, data);
+  } catch (error) {
+    console.warn("Unable to update like:", error);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+// Load saved counts when the page first opens.
+loadLikes();
+
 
 /* ---------- render résumé from editable data ---------- */
 const resume = document.getElementById("resume");
@@ -656,6 +880,45 @@ const zoom = document.getElementById("zoom");
 const zimg = document.getElementById("zimg");
 const zcap = document.getElementById("zcap");
 const zlink = document.getElementById("zoom-link");
+const zoomLike = document.getElementById("zoom-like");
+
+/* Persistent Likes in the enlarged photograph viewer */
+zoomLike.addEventListener("click", async () => {
+  if (zoomLike.disabled || !zoomLike.dataset.postId) return;
+
+  const postId = zoomLike.dataset.postId;
+  const alreadyLiked =
+    zoomLike.getAttribute("aria-pressed") === "true";
+
+  zoomLike.disabled = true;
+
+  try {
+    const data = await likesRequest(
+      postId,
+      alreadyLiked ? "unlike" : "like"
+    );
+
+    // Update the enlarged photograph's heart.
+    if (zoomLike.dataset.postId === postId) {
+      updateLikeButton(zoomLike, data);
+    }
+
+    // Synchronize the corresponding gallery heart.
+    wall.querySelectorAll(".photo-like").forEach(button => {
+      if (button.dataset.postId === postId) {
+        updateLikeButton(button, data);
+      }
+    });
+
+  } catch (error) {
+    console.warn("Unable to update enlarged photo Like:", error);
+  } finally {
+    if (zoomLike.dataset.postId === postId) {
+      zoomLike.disabled = false;
+    }
+  }
+});
+
 const zoomClose = document.getElementById("zoom-close");
 let returnUrl = pageUrl(currentPage);
 let restoreFocus = null;
@@ -672,6 +935,33 @@ function openPost(post, {updateUrl = false, focus = true} = {}) {
   zimg.alt = post.text;
   zcap.textContent = `${post.text} · ${fmt(post.date)}`;
   zlink.href = postUrl(post.id);
+
+/* Load the saved Like state for this photograph */
+zoomLike.dataset.postId = post.id;
+zoomLike.disabled = true;
+
+zoomLike.setAttribute("aria-pressed", "false");
+zoomLike.firstChild.textContent = "♡ ";
+zoomLike.querySelector(".like-count").textContent = "…";
+
+likesRequest(post.id, "status")
+  .then(data => {
+    if (zoomLike.dataset.postId === post.id && !zoom.hidden) {
+      updateLikeButton(zoomLike, data);
+    }
+  })
+  .catch(error => {
+    console.warn("Unable to load enlarged photo likes:", error);
+    if (zoomLike.dataset.postId === post.id) {
+      zoomLike.querySelector(".like-count").textContent = "—";
+    }
+  })
+  .finally(() => {
+    if (zoomLike.dataset.postId === post.id) {
+      zoomLike.disabled = false;
+    }
+  });
+
   zoom.hidden = false;
   document.body.style.overflow = "hidden";
   if(focus) zoomClose.focus();
@@ -749,6 +1039,12 @@ document.getElementById("contact-link").addEventListener("click", () => {
   document.getElementById("contact").hidden = false;
   document.getElementById("contact-link").setAttribute("aria-expanded", "true");
 });
+</script>
+<!-- GoatCounter privacy-friendly analytics -->
+<script
+  data-goatcounter="https://thingsisaw.goatcounter.com/count"
+  async
+  src="https://gc.zgo.at/count.js">
 </script>
 </body>
 </html>
