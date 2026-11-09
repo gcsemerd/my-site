@@ -15,7 +15,6 @@
 const POSTS = [
   { id: "phone-2026-06-18-2f51884a7e23450b", date: "2026-06-18", text: "Scrap metal art in Cabo", photos: ["photos/phone-2026-06-18-2f51884a7e23450b.jpg"] },
   { id: "phone-2026-11-08-10f3370fb4ef411d", date: "2026-11-08", text: "Puget sound sunset", photos: ["photos/phone-2026-11-08-10f3370fb4ef411d.jpg"] },
-  { id: "phone-2026-11-07-447212a8ca154fb9", date: "2026-11-07", text: "Another shroom", photos: ["photos/phone-2026-11-07-447212a8ca154fb9.jpg"] },
   { id: "red-mushroom-in-forest", date: "2026-11-07", text: "Giant mushroom at the Double 4 Tree Farm.", photos: ["photos/red-mushroom-in-forest.jpeg"] },
   { id: "cabo-waves-2026", date: "2026-06-17", text: "Cabo San Lucas beach.", photos: ["photos/cabo-sunset-view.jpeg"] },
   { id: "cabo-paper-flags-2026", date: "2026-06-15", text: "Festive streets in San Jose del Cabo.", photos: ["photos/colorful-street-cabo.jpeg"] },
