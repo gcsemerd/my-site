@@ -13,6 +13,7 @@
    Do not reuse or rename an id once shared.
    ============================================================ */
 const POSTS = [
+  { id: "phone-2026-10-31-63f798daf13b44e6", date: "2026-10-31", text: "Narrows bridge", photos: ["photos/phone-2026-10-31-63f798daf13b44e6.jpg"] },
   { id: "phone-2026-06-18-2f51884a7e23450b", date: "2026-06-18", text: "Scrap metal art in Cabo", photos: ["photos/phone-2026-06-18-2f51884a7e23450b.jpg"] },
   { id: "phone-2026-11-08-10f3370fb4ef411d", date: "2026-11-08", text: "Puget sound sunset", photos: ["photos/phone-2026-11-08-10f3370fb4ef411d.jpg"] },
   { id: "red-mushroom-in-forest", date: "2026-11-07", text: "Giant mushroom at the Double 4 Tree Farm.", photos: ["photos/red-mushroom-in-forest.jpeg"] },
