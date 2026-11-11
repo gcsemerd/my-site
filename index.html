@@ -73,7 +73,7 @@ footer{margin-top:2rem; font-family:var(--f-mono); font-size:.75rem; color:var(-
 .zoom-close{align-self:flex-end;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:.45rem .8rem;font:.75rem var(--f-mono);cursor:pointer}
 .zoom-link{color:var(--accent);font:.75rem var(--f-mono);text-underline-offset:3px}
 
-/* --- Unfolding résumé: inherits the site's fonts and palette. --- */
+/* --- Unfolding resume: inherits the site's fonts and palette. --- */
 .resume{margin-top:3.5rem; padding-top:2rem; border-top:2px solid var(--accent); scroll-margin-top:1.5rem}
 .resume-topline{font: .75rem var(--f-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--accent); margin:0 0 .75rem}
 .resume h2{font-family:var(--f-display); font-size:clamp(2rem,5vw,3rem); line-height:1.08; letter-spacing:-.03em; margin:.1rem 0 .5rem}
@@ -257,19 +257,19 @@ footer {
     <p id="about-text"></p>
   </section>
 
-  <!-- The résumé starts hidden. Clicking Resume opens it below About me. -->
+  <!-- The resume starts hidden. Clicking Resume opens it below About me. -->
   <section class="resume" id="resume" aria-labelledby="resume-h" hidden>
     <p class="resume-topline">Professional background</p>
-    <h2 id="resume-h">Résumé</h2>
+    <h2 id="resume-h">Resume</h2>
     <p class="resume-subtitle" id="resume-subtitle"></p>
     <div class="resume-tools">
       <a href="resume.pdf" id="resume-download" download>Download PDF</a>
-      <a href="#top" id="resume-close">Close résumé ↑</a>
+      <a href="#top" id="resume-close">Close resume ↑</a>
     </div>
     <div id="resume-content"></div>
   <div class="section-bottom-actions">
   <a href="#top" id="resume-close-bottom">
-    ↑ Close résumé &amp; return to top
+    ↑ Close resume &amp; return to top
   </a>
 </div>
   </section>
@@ -362,7 +362,7 @@ loadVisitCount();
 
 <script src="js/posts.js"></script>
 <script>
-/* Site and résumé settings below. Add photos in posts.js. */
+/* Site and resume settings below. Add photos in posts.js. */
 const SITE = {
   name: "Things I Saw",
   tagline: "",
@@ -381,8 +381,8 @@ const RESUME = {
       "paragraphs": [
         "Strengthening client relationships and delivering measurable business results.",
         "B2B SaaS account management professional with more than a decade of experience managing enterprise relationships, improving client retention, and driving revenue growth.",
-        "Proven success managing high-value client portfolios, including accounts representing approximately 15% of company revenue, while maintaining renewal rates exceeding 90%.",
-        "Experienced in translating complex performance data into actionable KPIs, leading executive-level reviews, and helping organizations maximize the value of our services."
+        "Experience and succes in managing high-value client portfolios, including accounts representing approximately 15% of company revenue, while maintaining renewal rates exceeding 90%.",
+        "Experienced in translating client data into actionable KPIs, leading leasing QBRs, and helping organizations recognize and maximize the value of our services."
       ]
     },
     {
@@ -392,8 +392,9 @@ const RESUME = {
           "role": "Business Advisor",
           "organization": "CallSource · Calabasas, California · Remote",
           "dates": "2024–2026",
-          "description": "Managed post-sale client success for a portfolio of more than 100 professional services and healthcare accounts, focusing on retention, product adoption, and long-term account growth.",
+          "description": "Post-sale client success management for an establashed SaaS platform",
           "highlights": [
+            "Managed post-sale client success for a portfolio of more than 100 professional services and healthcare accounts, focusing on retention, product adoption, and long-term account growth.",
             "Maintained a 90%+ contract renewal rate through proactive relationship management, strategic client engagement, and data-driven quarterly business reviews.",
             "Analyzed marketing campaign performance and agent productivity to identify improvement opportunities and recommend strategies aligned with client objectives.",
             "Led comprehensive quarterly business reviews, translating performance metrics into actionable recommendations and measurable business priorities.",
@@ -405,7 +406,7 @@ const RESUME = {
           "role": "Account Executive",
           "organization": "iovox · London, United Kingdom · Remote",
           "dates": "2022–2024",
-          "description": "Managed business development and existing client relationships across international markets, combining new-business acquisition with strategic account growth and retention.",
+          "description": "Business development and post sale account management across international markets with a focus on growth and retention.",
           "highlights": [
             "Consistently achieved new-business sales quotas while identifying and closing expansion opportunities within existing accounts.",
             "Conducted market research and prospecting to develop sales pipelines across domestic and international markets, including Australia and Canada.",
@@ -418,14 +419,16 @@ const RESUME = {
           "role": "Key Accounts Manager",
           "organization": "CallSource · Westlake Village, California",
           "dates": "2013–2022",
-          "description": "Directed strategic relationships across an enterprise-focused portfolio representing approximately 15% of CallSource's annual revenue, including the company's single largest client.",
+          "description": "Member of the Strategic Programs Team, tasked with managing and growing the largest books of business within CallSource.", 
           "highlights": [
+            "Directed strategic relationships across an enterprise-focused portfolio representing approximately 15% of CallSource's annual revenue, including the company's single largest client.",
             "Managed more than 100 client accounts throughout the complete customer lifecycle, including onboarding, implementation, integration, training, and technical support.",
             "Maintained a 90% client retention rate through relationship management, proactive issue resolution, and consistent engagement.",
             "Supported large-scale deployments of new technology products for enterprise customers, coordinating implementation across multiple systems and stakeholders.",
             "Managed project timelines, training schedules, and cross-platform operational processes to ensure successful integration and adoption.",
             "Coordinated troubleshooting and issue resolution across internal teams and third-party vendors, minimizing service interruptions.",
-            "Identified account discrepancies and operational risks, collaborating directly with clients to develop timely solutions."
+            "Identified account discrepancies and operational risks, collaborating directly with clients to develop timely solutions.",
+            "Supported a wide variety of enterprise clients, including Automotive OEMs, major website prooviders, and major whitelabel re-sellers of our services."
           ]
         }
       ]
@@ -435,7 +438,7 @@ const RESUME = {
       "jobs": [
         {
           "role": "Advisory Board Member",
-          "organization": "Z. Victor Paparigian and Marion V. Paparigian Charitable Foundation · Remote",
+          "organization": "Z. Victor Paparigian and Marion V. Paparigian Charitable Foundation · Remote (Part Time)",
           "dates": "2010–Present",
           "description": "Provide ongoing advisory support to a nonprofit organization dedicated to funding summer camp scholarships for children.",
           "highlights": [
@@ -802,7 +805,7 @@ wall.addEventListener("click", async event => {
 loadLikes();
 
 
-/* ---------- render résumé from editable data ---------- */
+/* ---------- render resume from editable data ---------- */
 const resume = document.getElementById("resume");
 const resumeLink = document.getElementById("resume-link");
 const pdfLink = document.getElementById("resume-download");
